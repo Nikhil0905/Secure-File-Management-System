@@ -157,5 +157,3 @@ Storage Layer
    - Potential enhancements
    - Scalability considerations
    - Feature additions
-
-This summary provides a quick reference for understanding the Secure File Management System's core concepts and implementation details. 
