@@ -334,5 +334,3 @@ logging.basicConfig(
 - Common issues
 - Error resolution
 - Performance optimization
-
-This technical documentation provides a comprehensive overview of the Secure File Management System's implementation, suitable for academic evaluation and technical understanding. 
