@@ -1,159 +1,140 @@
-# Secure File Management System - Project Summary
+# Secure File Management System - Summary
 
-## Quick Overview
-A secure file management system that provides encrypted storage, secure access, and file integrity verification through a command-line interface.
+## Project Overview
+A secure file management system that provides encrypted storage, two-factor authentication, and malware scanning capabilities through a command-line interface.
 
 ## Key Features
-1. **User Authentication**
-   - JWT-based authentication
-   - Secure password hashing with bcrypt
-   - Session management
+1. **Security**
+   - AES-256 encryption for all files
+   - Two-Factor Authentication (2FA)
+   - Malware scanning
+   - Secure session management
 
-2. **File Security**
-   - AES-256 encryption for files
-   - SHA-256 integrity verification
-   - Secure key management
+2. **File Management**
+   - Upload and download files
+   - Share files with other users
+   - Delete files
+   - List files with detailed information
 
-3. **Access Control**
-   - User-based permissions
-   - File-level access control
-   - Session tracking
+3. **User Interface**
+   - Command-line interface
+   - Rich terminal output
+   - Serial numbering for file lists
+   - Clear error messages
 
-4. **File Operations**
-   - Secure file upload
-   - Encrypted file storage
-   - Secure file download
-   - File sharing capabilities
+## Quick Start Guide
 
-## Technical Stack
-- **Language**: Python 3.x
-- **Key Libraries**:
-  - cryptography (AES-256)
-  - PyJWT (Authentication)
-  - bcrypt (Password Hashing)
-  - python-dotenv (Configuration)
-
-## System Architecture
-```
-User Interface (CLI)
-        ↓
-Authentication Layer
-        ↓
-Security Layer (Encryption)
-        ↓
-Storage Layer
+### 1. Setup
+```bash
+setup.bat
 ```
 
-## Key Components
-1. **Authentication System**
-   - JWT token generation
-   - Password hashing
-   - Session management
+### 2. Basic Usage
+```bash
+# Register
+python main.py register Admin
 
-2. **Encryption System**
-   - AES-256 file encryption
-   - SHA-256 integrity checks
-   - Secure key storage
+# Login
+python main.py login Admin
 
-3. **Storage System**
-   - Hash-based file storage
-   - Metadata management
-   - Logging system
+# Upload file
+python main.py upload "path\to\file"
 
-## Security Features
-1. **File Protection**
-   - End-to-end encryption
-   - Integrity verification
-   - Access control
+# List files
+python main.py list
 
-2. **User Security**
-   - Secure authentication
-   - Password hashing
-   - Session management
+# Share file
+python main.py share "filename" "username"
 
-3. **System Security**
-   - Error handling
-   - Logging
-   - Access control
+# Download file
+python main.py download "filename" "path\to\save"
 
-## Common Operations
-1. **File Upload**
-   ```bash
-   python main.py upload "file_path"
-   ```
+# Delete file
+python main.py delete "filename"
 
-2. **File Download**
-   ```bash
-   python main.py download filename "output_path"
-   ```
+# Logout
+python main.py logout
+```
 
-3. **File Sharing**
-   ```bash
-   python main.py share filename username
-   ```
+## Important Notes
 
-## Error Handling
-- Custom error classes
-- Detailed logging
-- User-friendly messages
+### Security
+- 2FA is mandatory for all users
+- Files are automatically encrypted
+- Session expires after 24 hours
+- Manual logout required
 
-## Performance Features
-- Chunk-based file processing
-- Memory-efficient operations
-- Optimized security operations
+### File Operations
+- Maximum file size: 100MB
+- All file types supported
+- Files are scanned for malware
+- Sharing requires user registration
 
-## Future Scope
-1. **Security Enhancements**
-   - Two-factor authentication
-   - Advanced encryption options
+### User Experience
+- Serial numbering in file lists
+- QR code for 2FA setup
+- Backup codes for account recovery
+- Clear error messages
 
-2. **Performance Improvements**
-   - Caching system
-   - Parallel processing
+## System Requirements
+- Python 3.8 or higher
+- Windows 10/11
+- Required Python packages (see requirements.txt)
 
-3. **Feature Additions**
-   - Web interface
-   - Cloud storage support
+## File Structure
+```
+secure-file-management-system/
+├── main.py                # Main application
+├── secure_file_manager.py # Core functionality
+├── setup.bat             # Setup script
+├── requirements.txt      # Dependencies
+└── secure_storage/       # File storage
+```
 
-## Deployment Requirements
-1. **System Requirements**
-   - Python 3.x
-   - Sufficient disk space
-   - Proper permissions
+## Common Issues and Solutions
 
-2. **Configuration**
-   - Environment variables
-   - Storage location
-   - Security keys
+### 1. Login Issues
+- Ensure 2FA code is correct
+- Check if backup code is valid
+- Verify username exists
 
-## Maintenance
-1. **Regular Tasks**
-   - Log rotation
-   - Storage cleanup
-   - Security updates
+### 2. File Operations
+- Check file size limits
+- Verify file permissions
+- Ensure sufficient storage space
 
-2. **Troubleshooting**
-   - Error resolution
-   - Performance optimization
-   - System monitoring
+### 3. System Issues
+- Check system logs
+- Verify environment variables
+- Ensure all dependencies are installed
 
-## Key Points for Viva
-1. **Security Implementation**
-   - How encryption works
-   - Authentication process
-   - Access control system
+## Best Practices
 
-2. **System Design**
-   - Architecture decisions
-   - Component interaction
-   - Data flow
+### 1. Security
+- Keep 2FA backup codes secure
+- Change password regularly
+- Use logout command when done
 
-3. **Technical Decisions**
-   - Technology choices
-   - Performance considerations
-   - Security measures
+### 2. File Management
+- Regular file cleanup
+- Monitor storage usage
+- Keep file names organized
 
-4. **Future Improvements**
-   - Potential enhancements
-   - Scalability considerations
-   - Feature additions
+### 3. System Usage
+- Check status before operations
+- Monitor system logs
+- Regular backups
+
+## Support
+For issues or questions:
+1. Check system logs
+2. Review technical documentation
+3. Contact system administrator
+
+## Future Improvements
+1. Web interface
+2. Mobile app
+3. Cloud storage integration
+4. Advanced malware detection
+5. File versioning
+6. Collaborative features 
