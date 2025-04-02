@@ -1,0 +1,25 @@
+2025-04-03 02:37:47,548 - ERROR - Error verifying token: fromisoformat: argument must be str
+2025-04-03 02:39:11,927 - ERROR - Error verifying token: fromisoformat: argument must be str
+2025-04-03 02:39:19,287 - ERROR - Error during login: 'SecureFileManager' object has no attribute '_verify_password'
+2025-04-03 02:40:50,156 - ERROR - Error verifying token: fromisoformat: argument must be str
+2025-04-03 02:41:02,985 - ERROR - Error during login: 'SecureFileManager' object has no attribute '_verify_password'
+2025-04-03 02:41:17,112 - ERROR - Error verifying token: fromisoformat: argument must be str
+2025-04-03 02:41:19,960 - ERROR - Error during login: 'SecureFileManager' object has no attribute '_verify_password'
+2025-04-03 02:42:06,406 - ERROR - Error verifying token: fromisoformat: argument must be str
+2025-04-03 02:42:16,323 - INFO - Token generated for user: Admin
+2025-04-03 02:42:16,324 - INFO - Session saved for user: Admin
+2025-04-03 02:42:16,324 - INFO - User logged in: Admin
+2025-04-03 02:42:25,812 - ERROR - Error verifying token: fromisoformat: argument must be str
+2025-04-03 02:42:28,564 - ERROR - Error verifying token: fromisoformat: argument must be str
+2025-04-03 02:43:05,956 - ERROR - Error verifying token: fromisoformat: argument must be str
+2025-04-03 02:43:05,972 - INFO - File uploaded: yogesh pic.jpg by Admin
+2025-04-03 02:43:09,973 - ERROR - Error verifying token: fromisoformat: argument must be str
+2025-04-03 02:44:17,880 - ERROR - Error verifying token: fromisoformat: argument must be str
+2025-04-03 02:44:17,881 - INFO - File deleted: yogesh pic.jpg by Admin
+2025-04-03 02:44:21,095 - ERROR - Error verifying token: fromisoformat: argument must be str
+2025-04-03 02:44:24,343 - ERROR - Error verifying token: fromisoformat: argument must be str
+2025-04-03 02:44:24,382 - INFO - File uploaded: yogesh pic.jpg by Admin
+2025-04-03 02:44:31,523 - ERROR - Error verifying token: fromisoformat: argument must be str
+2025-04-03 02:44:31,523 - INFO - User logging out: Admin
+2025-04-03 02:44:31,523 - INFO - Logout completed successfully
+2025-04-03 02:44:34,364 - INFO - No session file found

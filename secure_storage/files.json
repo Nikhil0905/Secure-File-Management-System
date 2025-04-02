@@ -1,0 +1,28 @@
+{
+    "Academic Calendar for Full Time programmes with commencement date as 13 January 2025.pdf": {
+        "hash": "e00990f6a5c194473c5cae3b2bc6265d52e7c6a11ad37d9616b8c7fe69601b60",
+        "encrypted_path": "D:\\Working Tech Projects\\Secure File management system\\secure_storage\\e00990f6a5c194473c5cae3b2bc6265d52e7c6a11ad37d9616b8c7fe69601b60_Academic Calendar for Full Time programmes with commencement date as 13 January 2025.pdf",
+        "owner": "nikhil",
+        "uploaded_at": "2025-04-03T02:01:02.525498",
+        "size": 123106,
+        "shared_with": []
+    },
+    "12307709CA1.pdf": {
+        "hash": "ac619fdd63dbdbbdfd72d86ffa0a14d5fa9e1abcac6854f75889bbf796232862",
+        "encrypted_path": "D:\\Working Tech Projects\\Secure File management system\\secure_storage\\ac619fdd63dbdbbdfd72d86ffa0a14d5fa9e1abcac6854f75889bbf796232862_12307709CA1.pdf",
+        "owner": "nikhil",
+        "uploaded_at": "2025-04-03T02:02:13.944354",
+        "size": 185464,
+        "shared_with": [
+            "Admin"
+        ]
+    },
+    "yogesh pic.jpg": {
+        "hash": "fbae160d3cf69c80b268114add4003cf83e647d2bf49c1ba7cbe78a9e358425f",
+        "encrypted_path": "D:\\Working Tech Projects\\Secure File management system\\secure_storage\\fbae160d3cf69c80b268114add4003cf83e647d2bf49c1ba7cbe78a9e358425f_yogesh pic.jpg",
+        "owner": "Admin",
+        "uploaded_at": "2025-04-03T02:44:24.382033",
+        "size": 30629,
+        "shared_with": []
+    }
+}
