@@ -1,239 +1,182 @@
 import click
+import os
+from secure_file_manager import SecureFileManager
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
-from rich.text import Text
-from secure_file_manager import SecureFileManager
-import os
+from rich import print as rprint
 from datetime import datetime
-from pathlib import Path
+import sys
 
 console = Console()
-file_manager = SecureFileManager()
 
-def check_auth():
-    if not file_manager.current_user:
-        console.print(Panel(Text("You must be logged in to perform this action", style="red")))
-        return False
-    return True
-
-def format_size(size_bytes: int) -> str:
-    """Convert size in bytes to human readable format"""
-    for unit in ['B', 'KB', 'MB', 'GB']:
-        if size_bytes < 1024:
-            return f"{size_bytes:.2f} {unit}"
-        size_bytes /= 1024
-    return f"{size_bytes:.2f} TB"
-
-def validate_path(path: str) -> Path:
-    """Validate and normalize file path"""
-    try:
-        # Convert to Path object
-        path_obj = Path(path)
-        # Resolve to absolute path
-        abs_path = path_obj.resolve()
-        return abs_path
-    except Exception as e:
-        raise click.BadParameter(f"Invalid path: {str(e)}")
+def handle_error(func):
+    """Decorator to handle errors gracefully"""
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            console.print(f"[red]Error: {str(e)}[/red]")
+            sys.exit(1)
+    return wrapper
 
 @click.group()
 def cli():
-    """Secure File Management System CLI"""
+    """Secure File Management System"""
     pass
 
-@cli.command()
-def status():
-    """Check current login status"""
-    if file_manager.current_user:
-        console.print(Panel(Text(f"Currently logged in as: {file_manager.current_user}", style="green")))
-    else:
-        console.print(Panel(Text("Not logged in", style="yellow")))
-
-@cli.command()
+@cli.command(name='register')
 @click.argument('username')
 @click.password_option()
+@handle_error
 def register(username, password):
     """Register a new user"""
-    if file_manager.current_user:
-        console.print(Panel(Text("Please logout before registering a new user", style="red")))
-        return
-
+    file_manager = SecureFileManager()
     if file_manager.register_user(username, password):
-        console.print(Panel(Text(f"Successfully registered user: {username}", style="green")))
+        console.print(f"[green]User {username} registered successfully![/green]")
+        console.print("[yellow]Please save your 2FA backup code shown above.[/yellow]")
     else:
-        console.print(Panel(Text("Error: Username already exists", style="red")))
+        console.print("[red]Registration failed. Username might already exist.[/red]")
 
-@cli.command()
+@cli.command(name='login')
 @click.argument('username')
-def login(username):
-    """Login to the system"""
-    if file_manager.current_user:
-        console.print(Panel(Text(f"Already logged in as: {file_manager.current_user}. Please logout first.", style="yellow")))
-        return
-
+@handle_error
+def login(username: str):
+    """Login to the system (2FA required)"""
+    # Get password securely
     password = click.prompt('Password', type=str, hide_input=True)
-    if file_manager.login(username, password):
-        console.print(Panel(Text(f"Successfully logged in as: {username}", style="green")))
+    
+    # Try to login
+    file_manager = SecureFileManager()
+    
+    # First attempt login with password
+    if file_manager.verify_password(username, password):
+        # Always require 2FA
+        code = click.prompt('Enter 2FA code from your authenticator app', type=str)
+        if file_manager.verify_2fa(username, code):
+            file_manager.complete_login(username)
+            console.print("[green]Login successful![/green]")
+        else:
+            console.print("[red]Invalid 2FA code. Login failed.[/red]")
     else:
-        console.print(Panel(Text("Error: Invalid username or password", style="red")))
+        console.print("[red]Login failed. Please check your credentials.[/red]")
 
-@cli.command()
+@cli.command(name='status')
+@handle_error
+def status():
+    """Check login status"""
+    file_manager = SecureFileManager()
+    if file_manager.current_user:
+        console.print(f"[green]Logged in as {file_manager.current_user}[/green]")
+    else:
+        console.print("[red]Not logged in[/red]")
+
+@cli.command(name='upload')
+@click.argument('file_path', type=click.Path(exists=True))
+@handle_error
+def upload(file_path):
+    """Upload a file"""
+    file_manager = SecureFileManager()
+    if not file_manager.current_user:
+        console.print("[red]Please login first[/red]")
+        return
+    
+    success, message = file_manager.upload_file(file_path)
+    if success:
+        console.print(f"[green]File uploaded successfully![/green]")
+    else:
+        console.print(f"[red]Upload failed: {message}[/red]")
+
+@cli.command(name='download')
+@click.argument('filename')
+@click.argument('save_path')
+@handle_error
+def download(filename, save_path):
+    """Download a file from secure storage"""
+    file_manager = SecureFileManager()
+    if not file_manager.is_logged_in():
+        console.print("[red]Please login first[/red]")
+        return
+    
+    result = file_manager.download_file(filename, save_path)
+    if result:
+        console.print(f"[green]Successfully downloaded {filename} to {save_path}[/green]")
+    else:
+        console.print(f"[red]Error: Failed to download file[/red]")
+
+@cli.command(name='list')
+@handle_error
+def list():
+    """List all files"""
+    file_manager = SecureFileManager()
+    if not file_manager.current_user:
+        console.print("[red]Please login first[/red]")
+        return
+    
+    files = file_manager.list_files()
+    if not files:
+        console.print("[yellow]No files found[/yellow]")
+        return
+    
+    table = Table(show_header=True, header_style="bold magenta")
+    table.add_column("S.No", style="bold", justify="right")
+    table.add_column("Name", style="cyan")
+    table.add_column("Size", justify="right")
+    table.add_column("Type", style="green")
+    table.add_column("Uploaded", style="yellow")
+    table.add_column("Owner", style="blue")
+    table.add_column("Shared", style="red")
+    
+    for index, file_info in enumerate(files, 1):
+        table.add_row(
+            str(index),
+            file_info['name'],
+            file_info['size'],
+            file_info['file_type'],
+            file_info['uploaded_at'],
+            file_info['owner'],
+            ", ".join(file_info['shared_with']) if file_info['shared_with'] else "No"
+        )
+    
+    console.print(table)
+
+@cli.command(name='share')
+@click.argument('filename')
+@click.argument('target_user')
+@handle_error
+def share(filename: str, target_user: str):
+    """Share a file with another user"""
+    file_manager = SecureFileManager()
+    if file_manager.share_file(filename, target_user):
+        console.print(f"[green]File '{filename}' shared with {target_user}[/green]")
+    else:
+        console.print("[red]Failed to share file. Please check if the file exists and you have permission.[/red]")
+
+@cli.command(name='delete')
+@click.argument('filename')
+@handle_error
+def delete(filename):
+    """Delete a file"""
+    file_manager = SecureFileManager()
+    if not file_manager.current_user:
+        console.print("[red]Please login first[/red]")
+        return
+    
+    if file_manager.delete_file(filename):
+        console.print(f"[green]File '{filename}' deleted successfully![/green]")
+    else:
+        console.print(f"[red]Failed to delete file. Please check if the file exists and you have permission.[/red]")
+
+@cli.command(name='logout')
+@handle_error
 def logout():
     """Logout from the system"""
-    if not file_manager.current_user:
-        console.print(Panel(Text("Not logged in", style="yellow")))
-        return
-
-    file_manager.logout()
-    console.print(Panel(Text("Successfully logged out", style="green")))
-
-@cli.command()
-@click.argument('file_path', type=click.Path(exists=True))
-def upload(file_path):
-    """Upload a file to the secure storage"""
-    if check_auth():
-        try:
-            # Validate and normalize the path
-            normalized_path = validate_path(file_path)
-            
-            # Check if path is a file
-            if not normalized_path.is_file():
-                console.print(Panel(Text(f"Error: {file_path} is not a file", style="red")))
-                return
-
-            # Check file permissions
-            try:
-                with open(normalized_path, 'rb') as f:
-                    f.seek(0)
-                    f.read(1)
-                    f.seek(0)
-            except PermissionError:
-                console.print(Panel(Text(f"Error: Permission denied for {file_path}", style="red")))
-                return
-            except Exception as e:
-                console.print(Panel(Text(f"Error accessing file: {str(e)}", style="red")))
-                return
-
-            if file_manager.upload_file(str(normalized_path)):
-                console.print(Panel(Text(f"Successfully uploaded: {file_path}", style="green")))
-            else:
-                console.print(Panel(Text("Error: Failed to upload file. Check the logs for details.", style="red")))
-        except click.BadParameter as e:
-            console.print(Panel(Text(str(e), style="red")))
-        except Exception as e:
-            console.print(Panel(Text(f"An unexpected error occurred: {str(e)}", style="red")))
-
-@cli.command()
-@click.argument('filename')
-@click.argument('output_path', type=click.Path())
-def download(filename, output_path):
-    """Download a file from secure storage"""
-    if check_auth():
-        try:
-            # Validate and normalize the output path
-            normalized_output = validate_path(output_path)
-            
-            # Check if output directory exists and is writable
-            output_dir = normalized_output.parent
-            if not output_dir.exists():
-                try:
-                    output_dir.mkdir(parents=True, exist_ok=True)
-                except Exception as e:
-                    console.print(Panel(Text(f"Error creating output directory: {str(e)}", style="red")))
-                    return
-
-            # Check if output location is writable
-            try:
-                with open(normalized_output, 'wb') as f:
-                    f.write(b'')
-                os.remove(normalized_output)
-            except PermissionError:
-                console.print(Panel(Text(f"Error: Permission denied for output location: {output_path}", style="red")))
-                return
-            except Exception as e:
-                console.print(Panel(Text(f"Error checking output location: {str(e)}", style="red")))
-                return
-
-            file_data = file_manager.download_file(filename)
-            if file_data:
-                try:
-                    with open(normalized_output, 'wb') as f:
-                        f.write(file_data)
-                    console.print(Panel(Text(f"Successfully downloaded: {filename}", style="green")))
-                except Exception as e:
-                    console.print(Panel(Text(f"Error saving file: {str(e)}", style="red")))
-            else:
-                console.print(Panel(Text("Error: File not found or access denied", style="red")))
-        except click.BadParameter as e:
-            console.print(Panel(Text(str(e), style="red")))
-        except Exception as e:
-            console.print(Panel(Text(f"An unexpected error occurred: {str(e)}", style="red")))
-
-@cli.command()
-def list():
-    """List all files in secure storage"""
-    if check_auth():
-        files = file_manager.list_files()
-        if files:
-            table = Table(title="Your Files")
-            table.add_column("S.No.", style="bold white", justify="right")
-            table.add_column("Filename", style="cyan")
-            table.add_column("Size", style="magenta")
-            table.add_column("Uploaded At", style="yellow")
-            table.add_column("Owner", style="green")
-            table.add_column("Status", style="blue")
-            
-            for index, file_info in enumerate(files, 1):
-                uploaded_at = datetime.fromisoformat(file_info['uploaded_at']).strftime('%Y-%m-%d %H:%M:%S')
-                status = "Shared" if file_info.get('shared', False) else "Owned"
-                table.add_row(
-                    str(index),
-                    file_info['name'],
-                    format_size(file_info['size']),
-                    uploaded_at,
-                    file_info['owner'],
-                    status
-                )
-            console.print(table)
-        else:
-            console.print(Panel(Text("No files found", style="yellow")))
-
-@cli.command()
-@click.argument('filename')
-def delete(filename):
-    """Delete a file from secure storage"""
-    if check_auth():
-        if file_manager.delete_file(filename):
-            console.print(Panel(Text(f"Successfully deleted: {filename}", style="green")))
-        else:
-            console.print(Panel(Text("Error: File not found or access denied", style="red")))
-
-@cli.command()
-@click.argument('filename')
-@click.argument('username')
-def share(filename, username):
-    """Share a file with another user"""
-    if check_auth():
-        if file_manager.share_file(filename, username):
-            console.print(Panel(Text(f"Successfully shared {filename} with {username}", style="green")))
-        else:
-            console.print(Panel(Text("Error: Failed to share file. Check the logs for details.", style="red")))
-
-@cli.command()
-@click.argument('filename')
-@click.argument('username')
-def revoke(filename, username):
-    """Revoke file sharing with another user"""
-    if check_auth():
-        if file_manager.revoke_share(filename, username):
-            console.print(Panel(Text(f"Successfully revoked sharing of {filename} with {username}", style="green")))
-        else:
-            console.print(Panel(Text("Error: Failed to revoke file sharing. Check the logs for details.", style="red")))
+    file_manager = SecureFileManager()
+    if file_manager.current_user:
+        file_manager.logout()
+        console.print("[green]Logged out successfully[/green]")
+    else:
+        console.print("[yellow]Not logged in[/yellow]")
 
 if __name__ == '__main__':
-    try:
-        cli()
-    except KeyboardInterrupt:
-        console.print("\nOperation cancelled by user")
-    except Exception as e:
-        console.print(Panel(Text(f"An unexpected error occurred: {str(e)}", style="red"))) 
+    cli() 
