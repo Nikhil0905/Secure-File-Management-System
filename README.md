@@ -21,7 +21,7 @@ A secure file management system with encryption, 2FA, and malware scanning capab
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
+git clone https://github.com/Nikhil0905/Secure-File-Management-System
 cd secure-file-management-system
 ```
 
