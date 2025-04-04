@@ -5,9 +5,23 @@ echo.
 :: Check if Python is installed
 python --version >nul 2>&1
 if errorlevel 1 (
-    echo Python is not installed! Please install Python 3.8 or higher.
-    pause
-    exit /b 1
+    echo Python is not installed! Attempting to download and install Python 3.8...
+    powershell -Command "Start-Process 'https://www.python.org/ftp/python/3.8.10/python-3.8.10-amd64.exe' -OutFile 'python-installer.exe' -Wait"
+    if exist python-installer.exe (
+        echo Running Python installer...
+        start /wait python-installer.exe /quiet InstallAllUsers=1 PrependPath=1
+        del python-installer.exe
+        python --version >nul 2>&1
+        if errorlevel 1 (
+            echo Failed to install Python! Please install it manually.
+            pause
+            exit /b 1
+        )
+    ) else (
+        echo Failed to download Python installer! Please check your internet connection.
+        pause
+        exit /b 1
+    )
 )
 
 :: Create virtual environment if it doesn't exist
